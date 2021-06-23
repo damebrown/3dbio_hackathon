@@ -25,7 +25,5 @@ def replace_names_cluster_files(clusters_path, dict_path):
     orig_file.close()
     new_file.close()
 
-
-
 # create_num_to_name_dict("name_num_dict")
-replace_names_cluster_files("output_0.8.clstr","name_num_dict")
+replace_names_cluster_files("output_0.8.clstr", "data_files/name_num_dict")

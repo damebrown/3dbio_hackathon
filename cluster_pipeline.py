@@ -1,6 +1,4 @@
 import matplotlib.pyplot as plt
-# from kneed import KneeLocator
-from sklearn.datasets import make_blobs
 from sklearn.cluster import KMeans, DBSCAN, SpectralClustering, AgglomerativeClustering, MiniBatchKMeans
 from sklearn.metrics import silhouette_score
 from sklearn.decomposition import PCA
@@ -11,14 +9,12 @@ import numpy as np
 from typing import Tuple
 
 
-import matplotlib.pyplot
-
-class TSNE_wrapper(TSNE):
+class TSNEWrapper(TSNE):
 
     def __init__(self, components=2):
-        super(TSNE_wrapper, self).__init__(n_components=components)
+        super(TSNEWrapper, self).__init__(n_components=components)
 
-    def transform(self, X, y=None):
+    def transform(self, X: np.array, y:np.array = None):
         return self.fit_transform(X)
 
 
@@ -32,7 +28,6 @@ class ClusterPipeline:
         self.scaler = scaler
         self.pipeline: Pipeline = None
         self.added_dict = kwargs
-
         self._create()
 
     def init_preprocess(self) -> Pipeline:
@@ -45,7 +40,7 @@ class ClusterPipeline:
         if self.dim_reduction == "PCA":
             return Pipeline([("PCA", PCA(self.number_of_dims))])
         if self.dim_reduction == "Tsne":
-            return Pipeline([("Tsne", TSNE_wrapper(self.number_of_dims))])
+            return Pipeline([("Tsne", TSNEWrapper(self.number_of_dims))])
 
     def init_cluster(self) -> Pipeline:
         if self.model == "Kmeans":

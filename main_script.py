@@ -1,4 +1,4 @@
-from clustering import ClusterPipeline
+from cluster_pipeline import ClusterPipeline
 import numpy as np
 import seaborn as sbn
 import matplotlib.pyplot as plt
@@ -6,43 +6,57 @@ import argparse
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 
-#####################################
-# k_means_experiment:
+# ------------ Constants --------
+# models_with_k_experiment:
 k_range = (3, 14)
 k_step = 1
-# k_means_spectral:
+# DBScan_experiment:
 eps = [0.1, 0.25, 0.5, 0.75, 0.9]
 # Titles:
 K_TITLE = "Clustering by correspondence size with {}, k={}"
 DBSCAN_TITLE = "Clustering by correspondence size with DBScan, \u03B5={}"
+# General constants:
 dim_reduction = ("Tsne", 2)
-#####################################
 
 
-def plot_scatter_2d(X, y, title):
+# --------------------------------
+
+
+def plot_scatter_2d(X: np.array, y: np.array, title: str):
     fig, ax = plt.subplots()
     plt.title(title)
-    for g in np.unique(y):
-        i = np.where(y == g)
-        ax.scatter(X[:, 0][i], X[:, 1][i], label=g)
+    for marker in np.unique(y):
+        i = np.where(y == marker)
+        ax.scatter(X[:, 0][i], X[:, 1][i], label=marker)
     plt.show()
 
-def plot_scatter_3d(X, y, title):
+
+def plot_scatter_3d(X: np.array, y: np.array, title: str):
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
-    # ax = fig.axes[0]
     plt.title(title)
-    for g in np.unique(y):
-        i = np.where(y == g)
-        ax.scatter(X[:, 0][i], X[:, 1][i], X[:, 2][i], label=g)
+    for marker in np.unique(y):
+        i = np.where(y == marker)
+        ax.scatter(X[:, 0][i], X[:, 1][i], X[:, 2][i], label=marker)
     plt.show()
 
-def plot_heatmap(X, labels, title):
-    indices = np.argsort(labels, kind='mergesort')  # we need a stable sort
+
+def plot(X: np.array, y: np.array, title: str, heatmap: bool = False):
+    if dim_reduction[1] == 3:
+        plot_scatter_3d(X, y, title)
+    else:
+        plot_scatter_2d(X, y, title)
+    if heatmap:
+        plot_heatmap(X, y, title)
+
+
+def plot_heatmap(X: np.array, y: np.array, title: str):
+    indices = np.argsort(y, kind='mergesort')  # we need a stable sort
     plt.figure()
     ax = sbn.heatmap(X[indices], cmap="YlGnBu")
     plt.title(title)
     plt.show()
+
 
 def models_with_k_experiment(data: np.array, model: str):
     for k in range(k_range[0], k_range[1], k_step):
@@ -50,19 +64,19 @@ def models_with_k_experiment(data: np.array, model: str):
         pipe.fit_transform(data)
         X = (pipe.pipeline.named_steps)['dim reduction'].named_steps[dim_reduction[0]].transform(data)
         y = pipe.pipeline.named_steps["clusterer"].named_steps[model].labels_
-        plot_scatter_2d(X, y, K_TITLE.format(model, k))
+        plot(X, y, K_TITLE.format(model, k))
 
 
-def DBScan_experiment(data):
+def DBScan_experiment(data: np.array):
     for epsilon in eps:
         pipe = ClusterPipeline("DBScan", dim_reduction, "Standard", eps=epsilon)
         pipe.fit(data)
         X = (pipe.pipeline.named_steps)['dim reduction'].named_steps[dim_reduction[0]].transform(data)
         y = pipe.pipeline.named_steps["clusterer"].named_steps["DBScan"].labels_
-        plot_scatter_2d(X, y, DBSCAN_TITLE.format(epsilon))
+        plot(X, y, DBSCAN_TITLE.format(epsilon))
 
 
-def minibatch_experiment(data):
+def mini_batch_experiment(data: np.array):
     for k in range(k_range[0], k_range[1], k_step):
         pipe = ClusterPipeline("MiniBatchKmeans", dim_reduction, "Standard", n_clusters=k, batch_size=10)
         pipe.fit_transform(data)
@@ -71,10 +85,7 @@ def minibatch_experiment(data):
         else:
             X = data
         y = pipe.pipeline.named_steps["clusterer"].named_steps["MiniBatchKmeans"].labels_
-        if dim_reduction[1] == 3:
-            plot_scatter_3d(X, y, K_TITLE.format("MiniBatchKmeans", k))
-        else:
-            plot_scatter_2d(X, y, K_TITLE.format("MiniBatchKmeans", k))
+        plot(X, y, K_TITLE.format("MiniBatchKmeans", k))
 
 
 def get_args():
@@ -85,7 +96,6 @@ def get_args():
 
 
 def main():
-
     # load data into matrix
     # How much data can we load, if not everything how do we split it up in an intelligent way
 
@@ -108,9 +118,7 @@ def main():
         np.random.seed(1)
         our_data = np.random.random((100, 100))
 
-
-    minibatch_experiment(our_data)
-
+    mini_batch_experiment(our_data)
 
 
 if __name__ == '__main__':
