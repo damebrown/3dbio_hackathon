@@ -8,22 +8,27 @@ from sklearn.manifold import TSNE
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.pipeline import Pipeline
 import numpy as np
+from typing import Tuple
 
 
 import matplotlib.pyplot
 
 class TSNE_wrapper(TSNE):
 
+    def __init__(self, components=2):
+        super(TSNE_wrapper, self).__init__(n_components=components)
+
     def transform(self, X, y=None):
-        return TSNE().fit_transform(X)
+        return self.fit_transform(X)
 
 
 class ClusterPipeline:
 
-    def __init__(self, model: str, dim_reduction: str, scaler: str, **kwargs):
+    def __init__(self, model: str, dim_reduction: Tuple[str, int], scaler: str, **kwargs):
 
         self.model = model
-        self.dim_reduction = dim_reduction
+        self.dim_reduction = dim_reduction[0]
+        self.number_of_dims = dim_reduction[1]
         self.scaler = scaler
         self.pipeline: Pipeline = None
         self.added_dict = kwargs
@@ -38,9 +43,9 @@ class ClusterPipeline:
 
     def init_dim_reduction(self) -> Pipeline:
         if self.dim_reduction == "PCA":
-            return Pipeline([("PCA", PCA(2))])
+            return Pipeline([("PCA", PCA(self.number_of_dims))])
         if self.dim_reduction == "Tsne":
-            return Pipeline([("Tsne", TSNE_wrapper(2))])
+            return Pipeline([("Tsne", TSNE_wrapper(self.number_of_dims))])
 
     def init_cluster(self) -> Pipeline:
         if self.model == "Kmeans":
