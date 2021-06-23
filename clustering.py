@@ -1,45 +1,56 @@
 import matplotlib.pyplot as plt
 from kneed import KneeLocator
 from sklearn.datasets import make_blobs
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans, DBSCAN, SpectralClustering, AgglomerativeClustering
 from sklearn.metrics import silhouette_score
-from  sklearn.decomposition import PCA
+from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
-from sklearn.preprocessing import StandardScaler ,MinMaxScaler
+from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from sklearn.pipeline import Pipeline
 import numpy as np
 
 
-class clusterPipline:
-
+class ClusterPipeline:
     clustering_set = set("Kmeans", "Spectral", "DBScan", "Hierarchical")
 
-    def __init__(self, model:str, dim_reduction: bool, scaler: str, **kwargs):
+    def __init__(self, model: str, dim_reduction: bool, scaler: str, **kwargs):
 
         self.model = model
         self.dim_reduction = dim_reduction
         self.scaler = scaler
-        self.preprocessor_pipeline = None
-        self.dim_reduction_pipeline = None
-        self.cluster_pipeline = None
         self.__dict__ = kwargs
+        self.pipeline = None
+        self._create()
 
-
-    def init_preprocess(self ):
+    def init_preprocess(self) -> Pipeline:
         if self.scaler == "Standard":
-            self.preprocessor_pipeline = Pipeline([("scaler", StandardScaler())])
+            return Pipeline([("Standard", StandardScaler())])
         elif self.scaler == "MinMax":
-            self.preprocessor_pipeline = Pipeline([("scaler", MinMaxScaler())])
+            return Pipeline([("MinMax", MinMaxScaler())])
 
-    def init_dim_reduction(self):
+    def init_dim_reduction(self) -> Pipeline:
         if self.dim_reduction == "PCA":
-            self.dim_reduction_pipeline = Pipeline(["dim reduce", PCA(2)])
+            return Pipeline(["PCA", PCA(2)])
         if self.dim_reduction == "Tsne":
-            self.dim_reduction_pipeline = Pipeline(["dim reduce", TSNE(2)])
+            return Pipeline(["Tsne", TSNE(2)])
 
-    def init_cluster(self):
-        if self.model == "Kmeans"
+    def init_cluster(self) -> Pipeline:
+        if self.model == "Kmeans":
+            return Pipeline([("Kmeans", KMeans(**self.__dict__))])
 
+        if self.model == "Spectral":
+            return Pipeline([("Spectral", SpectralClustering(**self.__dict__))])
+
+        if self.model == "DBScan":
+            return Pipeline([("DBScan", DBSCAN(**self.__dict__))])
+
+        if self.model == "Hierarchical":
+            return Pipeline([("Hierarchical", AgglomerativeClustering(**self.__dict__))])
+
+    def _create(self):
+        self.pipeline = Pipeline([("preprocessor", self.init_preprocess()),
+                                  ("dim reduction", self.init_dim_reduction()),
+                                  ("clusterer", self.init_cluster())])
 
     def fit(self, data: np.array):
         """
@@ -47,7 +58,4 @@ class clusterPipline:
         :param data:
         :return:
         """
-        return
-
-
-class KMeans:
+        self.pipeline.fit(data)
