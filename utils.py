@@ -18,7 +18,7 @@ def replace_names_cluster_files(clusters_path, dict_path):
     for line in orig_file.readlines():
         if '...' in line:
             name = line.split("...")[0].split(">")[1]
-            new_line = line.replace(name, name_to_num[name])
+            new_line = name_to_num[name] +"\n"
             new_file.write(new_line)
         else:
             new_file.write(line)
@@ -28,4 +28,4 @@ def replace_names_cluster_files(clusters_path, dict_path):
 
 
 # create_num_to_name_dict("name_num_dict")
-# replace_names_cluster_files("output_0.8.clstr","name_num_dict")
+replace_names_cluster_files("output_0.8.clstr","name_num_dict")
