@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 # from kneed import KneeLocator
 from sklearn.datasets import make_blobs
-from sklearn.cluster import KMeans, DBSCAN, SpectralClustering, AgglomerativeClustering
+from sklearn.cluster import KMeans, DBSCAN, SpectralClustering, AgglomerativeClustering, MiniBatchKMeans
 from sklearn.metrics import silhouette_score
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
@@ -11,6 +11,12 @@ import numpy as np
 
 
 import matplotlib.pyplot
+
+class TSNE_wrapper(TSNE):
+
+    def transform(self, X, y=None):
+        return TSNE().fit_transform(X)
+
 
 class ClusterPipeline:
 
@@ -34,11 +40,14 @@ class ClusterPipeline:
         if self.dim_reduction == "PCA":
             return Pipeline([("PCA", PCA(2))])
         if self.dim_reduction == "Tsne":
-            return Pipeline([("Tsne", TSNE(2))])
+            return Pipeline([("Tsne", TSNE_wrapper(2))])
 
     def init_cluster(self) -> Pipeline:
         if self.model == "Kmeans":
             return Pipeline([("Kmeans", KMeans(**self.added_dict))])
+
+        if self.model == "MiniBatchKmeans":
+            return Pipeline([("MiniBatchKmeans", MiniBatchKMeans(**self.added_dict))])
 
         if self.model == "Spectral":
             return Pipeline([("Spectral", SpectralClustering(**self.added_dict))])
@@ -50,9 +59,8 @@ class ClusterPipeline:
             return Pipeline([("Hierarchical", AgglomerativeClustering(**self.added_dict))])
 
     def _create(self):
-        self.pipeline = Pipeline([("preprocessor", self.init_preprocess()),
-                                  ("dim reduction", self.init_dim_reduction()),
-                                  ("clusterer", self.init_cluster())])
+        pipes = [pipe for pipe in [("preprocessor", self.init_preprocess()), ("dim reduction", self.init_dim_reduction()), ("clusterer", self.init_cluster())] if pipe[1]]
+        self.pipeline = Pipeline(pipes)
 
     def fit_transform(self, data: np.array):
         """
@@ -70,3 +78,16 @@ class ClusterPipeline:
         :return:
         """
         return self.pipeline.fit(data)
+
+
+# class IterativeCluster:
+#
+#     def __init__(self, worker_num: int, batch_size: int, data_dir: str):
+#
+#         self.centroids = []
+#         self.worker_num = worker_num
+#         self.batch_size = batch_size
+#         self.data_dir = data_dir
+#
+#
+#     def cluster(self):
