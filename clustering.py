@@ -54,10 +54,19 @@ class ClusterPipeline:
                                   ("dim reduction", self.init_dim_reduction()),
                                   ("clusterer", self.init_cluster())])
 
-    def fit(self, data: np.array):
+    def fit_transform(self, data: np.array):
         """
         fit the data according to the pipeline parameters
         :param data:
         :return:
         """
         return self.pipeline.fit_transform(data)
+
+
+    def fit(self, data: np.array):
+        """
+        fit the data according to the pipeline parameters
+        :param data:
+        :return:
+        """
+        return self.pipeline.fit(data)
