@@ -11,7 +11,7 @@ import pickle
 
 # ------------ Constants --------
 # models_with_k_experiment:
-k_range = (3, 300)
+k_range = (3, 500)
 # k_range = (1, 3)
 k_step = 5
 # DBScan_experiment:
@@ -25,9 +25,10 @@ GRAPH_FIG_PATH = "/cs/usr/punims/Desktop/punims-dinaLab/Bio3D_Hackathon/3dbio_ha
 GRAPH_TITLE = "Kmeans scores, {}-{}, {}"
 PKL_Path = "/cs/usr/punims/Desktop/punims-dinaLab/Bio3D_Hackathon/3dbio_hackathon/data_files/Figures/Pickle/representatives_1000_{}_{}_{}_{}_{}.pickle"
 # General constants:
-# dim_reduction = ("Tsne", 2)
-dim_reduction = (None, 2)
+dim_reduction = ("Tsne", 2)
+# dim_reduction = (Tsne, 2)
 SAVE = True
+
 SCALER = "Standard"
 
 
@@ -59,10 +60,10 @@ def plot_scatter_3d(X: np.array, y: np.array, title: str, save_path: str = None)
 
 def plot(X: np.array, y: np.array, title: str, save_path: str = None, heatmap: bool = False):
     plt.rcParams.update({'font.size': 8})
-    # if dim_reduction[1] == 3:
-    #     plot_scatter_3d(X, y, title, save_path)
-    # else:
-    #     plot_scatter_2d(X, y, title, save_path)
+    if dim_reduction[1] == 3:
+        plot_scatter_3d(X, y, title, save_path)
+    else:
+        plot_scatter_2d(X, y, title, save_path)
     if heatmap:
         save_path = save_path + "_heatmap" if save_path else save_path
         plot_heatmap(X, y, title, save_path)
@@ -126,7 +127,7 @@ def mini_batch_experiment(data: np.array):
         else:
             X = data
         y = pipe.pipeline.named_steps["clusterer"].named_steps["MiniBatchKmeans"].labels_
-        plot(X, y, K_TITLE.format("MiniBatchKmeans", k, dim_reduction[0], dim_reduction[1], SCALER), DEFAULT_FIG_PATH.format("MinibatchKmeans", k, dim_reduction[0], dim_reduction[1], SCALER), heatmap = True)
+        plot(X, y, K_TITLE.format("MiniBatchKmeans", k, dim_reduction[0], dim_reduction[1], SCALER), DEFAULT_FIG_PATH.format("MinibatchKmeans", k, dim_reduction[0], dim_reduction[1], SCALER), heatmap=False)
         scores.append(pipe.pipeline.named_steps["clusterer"].named_steps["MiniBatchKmeans"].inertia_)
         save_labels(PKL_Path.format("MinibatchKmeans", k, dim_reduction[0], dim_reduction[1], SCALER), y)
     plot_score_graph(list(range(k_range[0], k_range[1], k_step)), scores, GRAPH_TITLE.format(dim_reduction[0], dim_reduction[1], SCALER), GRAPH_FIG_PATH.format("Kmeans", dim_reduction[0], dim_reduction[1], SCALER))
