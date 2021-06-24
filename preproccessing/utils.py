@@ -1,3 +1,5 @@
+import os
+
 ####################################################################################################
 # Code to replace the name of the structures in the cluster files with their corresponding number  #
 ####################################################################################################
@@ -25,3 +27,6 @@ def replace_names_cluster_files(clusters_path, dict_path):
     orig_file.close()
     new_file.close()
     return "output0.9_replaced.clstr"
+
+def rename_structures(directory_path):
+    pass
