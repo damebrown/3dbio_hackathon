@@ -38,37 +38,6 @@ def matrix_to_pdb(pdb_file, seq, coord_matrix):
     pdb_file.write(END_LINE)
 
 
-# def createRandomPDBs(path_to_matrix, num):
-#     """
-#     recieves a path to coordinates matrix of 100,000 different nanobodies and create 10,000 random PDBs
-#     """
-#
-#     # TODO: 1. get 100,000 random pdbs and save their indexes
-#     #      2. think of which clusters to save (remove small clusters)
-#
-#     indexes = list(np.random.choice(np.arange(1,100001), 10000, replace=False))
-#
-#     sequences = []
-#     seq = open("sequences.txt", 'r').read().split('\n')[(num-1) * 100000: num * 100000]
-#
-#     for index in indexes:
-#         sequences.append(seq[index - 1])
-#
-#
-#     print(len(sequences))
-#
-#     # load matrix with aa coordinates
-#     mat = np.load(path_to_matrix)
-#
-#     # create ca pdb file
-#     for j in range(len(indexes)):
-#         ca_file_name = "pdbss/" + str((num-1)*100000 + indexes[j]) + ".pdb"
-#         with open(ca_file_name, "w") as ca_file:
-#             matrix_to_pdb(ca_file, sequences[j], mat[indexes[j] - 1])
-#         if(j == 0):
-#             print(sequences[j])
-#             print(indexes[j])
-
 def createRandomPDBs(path_to_matrix, num):
     """
     recieves a path to coordinates matrix of 100,000 different nanobodies and create 1,000 random PDBs
