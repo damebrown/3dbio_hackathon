@@ -7,7 +7,7 @@ import numpy as np
 ####################################################################################################
 
 def triangle_to_symmetric_matrix(matrix_path):
-    df = pd.read_csv(matrix_path, sep=',', header=None, dtype=int)
+    df = pd.read_csv(matrix_path, sep=',', header=None)
     orig_matrix = df.values[:, :df.values.shape[0]]
     # orig_matrix = np.array([[123,107,113,103],[140,110,108],[136,106],[115]])
     new_matrix = np.zeros((orig_matrix.shape[0], orig_matrix.shape[0]))
@@ -16,7 +16,7 @@ def triangle_to_symmetric_matrix(matrix_path):
         right_side = [orig_matrix[i][j] for j in range(0, orig_matrix.shape[0]) if
                       not pd.isna(orig_matrix[i][j])]
         new_matrix[i] = np.array(left_side + right_side)
-    return new_matrix
+    return new_matrix.astype(int)
     # create_num_to_name_dict("name_num_dict")
 
 
