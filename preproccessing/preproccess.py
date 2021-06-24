@@ -9,6 +9,7 @@ ATOM_LINE = "ATOM{}{}  CA  {} H{}{}{}{:.3f}{}{:.3f}{}{:.3f}  1.00 0.00          
 END_LINE = "END"
 CLUSTER_PREFIX = ">Cluster "
 
+
 def matrix_to_pdb(pdb_file, seq, coord_matrix):
     """
     translates a matrix of Ca x,y,z coordinates to PDB format
@@ -30,7 +31,9 @@ def matrix_to_pdb(pdb_file, seq, coord_matrix):
                 three = "UNK"
             else:
                 three = Polypeptide.one_to_three(seq[aa])
-            pdb_file.write(ATOM_LINE.format(first_space, i, three, second_space, i, third_space, coord_matrix[aa][0],forth_space, coord_matrix[aa][1],fifth_space, coord_matrix[aa][2]))
+            pdb_file.write(
+                ATOM_LINE.format(first_space, i, three, second_space, i, third_space, coord_matrix[aa][0], forth_space,
+                                 coord_matrix[aa][1], fifth_space, coord_matrix[aa][2]))
             i += 1
     pdb_file.write(END_LINE)
 
@@ -71,10 +74,7 @@ def createRandomPDBs(path_to_matrix, num):
     recieves a path to coordinates matrix of 100,000 different nanobodies and create 1,000 random PDBs
     """
 
-    # TODO: 1. get 100,000 random pdbs and save their indexes
-    #      2. think of which clusters to save (remove small clusters)
-
-    indexes = list(np.random.choice(np.arange(1,100001), 1000, replace=False))
+    indexes = list(np.random.choice(np.arange(1, 100001), 1000, replace=False))
 
     sequences = []
     seq = open("../data_files/sequences.txt", 'r').read().split('\n')[(num - 1) * 100000: num * 100000]
@@ -89,15 +89,14 @@ def createRandomPDBs(path_to_matrix, num):
 
     #    create ca pdb file
     for j in range(len(indexes)):
-        ca_file_name = "pdbs/" + str((num-1)*1000 + j + 1) + ".pdb"
-        file_with_real_indexes.write(str((num-1)*100000 + indexes[j]) + "\n")
+        ca_file_name = "pdbs/" + str((num - 1) * 1000 + j + 1) + ".pdb"
+        file_with_real_indexes.write(str((num - 1) * 100000 + indexes[j]) + "\n")
         with open(ca_file_name, "w") as ca_file:
             matrix_to_pdb(ca_file, sequences[j], mat[indexes[j] - 1])
             print(mat[indexes[j] - 1])
-        if(j == 0):
+        if (j == 0):
             print(sequences[j])
             print(indexes[j])
-
 
 
 def parse_DCHit(path_to_clstrs):
@@ -105,7 +104,7 @@ def parse_DCHit(path_to_clstrs):
     recieves a path to the output file of DCHit
     """
 
-    name = replace_names_cluster_files(path_to_clstrs , "/cs/usr/fridalon/PycharmProjects/3dbio_hackathon/data_files/name_num_dict")
+    name = replace_names_cluster_files(path_to_clstrs, "C:/Alon/3dbio_hackathon/data_files/name_num_dict")
     res = open(path_to_clstrs + name, 'r').read().split('\n')
     res = res[:len(res) - 1]
     cluster_num = -1
@@ -114,7 +113,7 @@ def parse_DCHit(path_to_clstrs):
         if res[i].find(CLUSTER_PREFIX) >= 0:
             cluster_num = int(res[i][len(CLUSTER_PREFIX):])
         else:
-            if(cluster_num in clusters):
+            if (cluster_num in clusters):
                 clusters[cluster_num].append(int(res[i]))
             else:
                 clusters[cluster_num] = [int(res[i])]
@@ -122,30 +121,48 @@ def parse_DCHit(path_to_clstrs):
     max_size = 0
     max_cluster = 0
     for key in clusters:
-        if(len(clusters[key]) > max_size):
+        if (len(clusters[key]) > max_size):
             max_cluster = key
             max_size = len(clusters[key])
 
-    indexes = list(np.random.choice(np.arange(0,len(clusters[max_cluster])), 1000, replace = False))
-    return np.array(clusters[max_cluster])[indexes]
+    clusters_by_size = sorted(clusters, key=lambda k: len(clusters[k]), reverse=True)
+
+    # OPTION 1:
+    #   5 random pdbs from 200 biggest clusters
+    #
+    #
+    # f = open("pdbs/pdbs_5_from_200.txt", 'a')
+    # for i in range(200):
+    #     indexes = np.random.choice(np.arange(len(clusters[clusters_by_size[i]])), 5, replace= False)
+    #     global_indexes = np.array(np.array(clusters[clusters_by_size[i]])[indexes])
+    #     creaPDBs_by_index(global_indexes, "pdbs/pdbs_5_from_200/")
+    #     f.write(str(global_indexes) + '\n')
+    # f.close()
+
+    # OPTION 2:
+    #   1000 random pdbs from biggest cluster
+    #
+    #
+    # indexes = list(np.random.choice(np.arange(0,len(clusters[max_cluster])), 1000, replace = False))
+    # creaPDBs_by_index(np.array(clusters[max_cluster])[indexes], "pdbs/pdbs_1000_biggest/")
 
 
 def createPDBs():
-    for num in range(1,10):
+    for num in range(1, 10):
         createRandomPDBs("/cs/usr/fridalon/Downloads/" + str(num) + "_100000.npy", num)
 
-# def creaPDBs_by_index(indexes):
-#
-#     sequences = open("../data_files/sequences.txt", 'r').read().split('\n')
-#
-#     for j in range(len(indexes)):
-#         ca_file_name = "pdbs/1000_from_biggest/" + str(indexes[j]) + ".pdb"
-#         with open(ca_file_name, "w") as ca_file:
-#             matrix_to_pdb(ca_file, sequences[indexes[j]], mat[indexes[j] - 1])
-#             print(mat[indexes[j] - 1])
-#         if (j == 0):
-#             print(sequences[j])
-#             print(indexes[j])
+
+def creaPDBs_by_index(indexes, path):
+    sequences = open("sequences.txt", 'r').read().split('\n')
+
+    for i in range(1, 10):
+        mat = np.load("pdb_results/" + str(i) + "_100000.npy", 'r')
+        filtered_ind = indexes[indexes < i * 100000]
+        filtered_ind = filtered_ind[filtered_ind > (i - 1) * 100000]
+        for ind in filtered_ind:
+            ca_file_name = path + str(ind) + ".pdb"
+            with open(ca_file_name, "w") as ca_file:
+                matrix_to_pdb(ca_file, sequences[ind - 1], mat[(ind - 1) % 100000])
 
 
 if __name__ == '__main__':
@@ -153,11 +170,11 @@ if __name__ == '__main__':
     receives path to a Nb fasta file and a path to a trained neural network and creates a pdb file (Ca only) according to
     the network prediction. the output file name is: "<fasta file name>_nanonet_ca.pdb"
     """
+    #   create all 1,000,000 pdbs from matrix of coordinates
+    createPDBs()
 
-    indexes = parse_DCHit("CDHits_results/")
-    print(indexes)
-
-
-
-
+    #   parse CDHits results - 2 options:
+    #   1. create 1000 random pdbs from biggest cluster
+    #   2. create 5 random pdbs from each of the biggest 200 clusters
+    parse_DCHit("CDHits_results/")
 
