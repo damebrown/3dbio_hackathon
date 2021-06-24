@@ -31,4 +31,15 @@ def replace_names_cluster_files(clusters_path, dict_path):
 
 
 def rename_structures(directory_path):
-    pass
+    print(os.listdir(directory_path))
+    dict_file = open("struct_to_index_second_1000.txt", 'w')
+    results = "/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/pdbs_5_from_200_renamed/"
+    for i,file in enumerate(os.listdir(directory_path)):
+        print(i)
+        struct_num = file.split(".pdb")[0]
+        dict_file.write(str(i+1)+","+struct_num+"\n")
+        os.rename(directory_path+file, results+str(i+1)+".pdb")
+    dict_file.close()
+
+
+rename_structures("/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/pdbs_5_from_200/")
