@@ -5,7 +5,7 @@ import pandas as pd
 import numpy as np
 import preproccessing
 from preproccessing.utils import create_num_to_name_dict
-import random
+import os
 import preproccessing.preproccess as prcs
 import seaborn as sbn
 
@@ -82,10 +82,10 @@ def plot_heatmap_max(X: np.array, title: str, save_path: str = None):
 
 # yitzhack's clusters
 files = [
-    "representatives_1000_MinibatchKmeans_200_Tsne_2_Standard.pickle",
-    "representatives_1000_MinibatchKmeans_200_Tsne_2_MinMax.pickle",
-    "representatives_1000_MinibatchKmeans_200_None_2_MinMax.pickle",
-    "representatives_1000_MinibatchKmeans_200_None_2_Standard.pickle"]
+    "/data_files/labels/representatives_1000_MinibatchKmeans_200_Tsne_2_Standard.pickle",
+    "/data_files/labels/representatives_1000_MinibatchKmeans_200_Tsne_2_MinMax.pickle",
+    "/data_files/labels/representatives_1000_MinibatchKmeans_200_None_2_MinMax.pickle",
+    "/data_files/labels/representatives_1000_MinibatchKmeans_200_None_2_Standard.pickle"]
 for k, path in enumerate(files):
     f = open(path, 'rb')
     file = pickle.load(f)
