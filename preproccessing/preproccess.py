@@ -43,7 +43,7 @@ def createRandomPDBs(path_to_matrix, num):
     recieves a path to coordinates matrix of 100,000 different nanobodies and create 1,000 random PDBs
     """
 
-    indexes = list(np.random.choice(np.arange(1, 100001), 1000, replace=False))
+    indexes = list(np.random.choice(np.arange(1, 100001), 1000, replace = False))
 
     sequences = []
     seq = open("../data_files/sequences.txt", 'r').read().split('\n')[(num - 1) * 100000: num * 100000]
@@ -68,13 +68,15 @@ def createRandomPDBs(path_to_matrix, num):
             print(indexes[j])
 
 
-def parse_DCHit(path_to_clstrs):
+def parse_DCHit():
     """
     recieves a path to the output file of DCHit
     """
 
-    name = replace_names_cluster_files(path_to_clstrs, "C:/Alon/3dbio_hackathon/data_files/name_num_dict")
-    res = open(path_to_clstrs + name, 'r').read().split('\n')
+    # name = replace_names_cluster_files('CDHits_results/',
+    #                                    "C:/Alon/3dbio_hackathon/data_files/name_num_dict")
+    name = "preproccessing/CDHits_results/output0.9_replaced.clstr"
+    res = open(name, 'r').read().split('\n')
     res = res[:len(res) - 1]
     cluster_num = -1
     clusters = {}
@@ -87,14 +89,7 @@ def parse_DCHit(path_to_clstrs):
             else:
                 clusters[cluster_num] = [int(res[i])]
 
-    max_size = 0
-    max_cluster = 0
-    for key in clusters:
-        if (len(clusters[key]) > max_size):
-            max_cluster = key
-            max_size = len(clusters[key])
-
-    clusters_by_size = sorted(clusters, key=lambda k: len(clusters[k]), reverse=True)
+    return clusters
 
     # OPTION 1:
     #   5 random pdbs from 200 biggest clusters
@@ -146,4 +141,3 @@ if __name__ == '__main__':
     #   1. create 1000 random pdbs from biggest cluster
     #   2. create 5 random pdbs from each of the biggest 200 clusters
     parse_DCHit("CDHits_results/")
-

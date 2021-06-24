@@ -1,8 +1,13 @@
+import matplotlib.pyplot as plt
+import pickle
+
 import pandas as pd
 import numpy as np
+import preproccessing
 from preproccessing.utils import create_num_to_name_dict
 import random
-import preproccessing
+import preproccessing.preproccess as prcs
+import seaborn as sbn
 
 
 ####################################################################################################
@@ -29,8 +34,8 @@ def triangle_to_symmetric_matrix(matrix_path, dict_path):
 
 
 # replace_names_cluster_files("output_0.8.clstr", "name_num_dict")
-triangle_to_symmetric_matrix("correspond_1000_first_batch_08.csv",
-                             "preproccessing/struct_to_index_first_1000.txt")
+# triangle_to_symmetric_matrix("correspond_1000_first_batch_08.csv",
+#                              "preproccessing/struct_to_index_first_1000.txt")
 
 
 def get_key(val, dict):
@@ -40,39 +45,70 @@ def get_key(val, dict):
     return None
 
 
-def get_indices(samples):
-    f = open("preproccessing\\indexes.txt", 'r')
-    samples = np.c_[samples, np.zeros(len(samples))]
-    for i in range(len(samples)):
-        samples[i, -1] = f.readline()
-    return samples
-
-
-# 100 samples, 1 cluster, 1 alon's index
 def func(samples):
-    # samples = get_indices(samples)
-    clusters_dict = preproccessing.preproccess.parse_DCHit()
-    samples = np.c_[samples, np.zeros(len(samples))]
-    f = open("preproccessing\\indexes.txt", 'r')
+    alons_clusters_dict = prcs.parse_DCHit()
+    false2true_index_dict = preproccessing.utils.create_num_to_name_dict(
+        "preproccessing/struct_to_index_second_1000.txt", False)
+    # false to true index (like indexes file)
+    samples = np.c_[samples, np.zeros(len(samples))].astype(int)
     for i, sample in enumerate(samples):
-        samples[i, -1] = int(get_key(int(f.readline().strip('\n')), clusters_dict))
-    f.close()
+        x = int(false2true_index_dict[str(i + 1)])
+        key = get_key(x, alons_clusters_dict)
+        samples[i, -1] = int(key)
     return samples
 
 
-mat = []
-for x in range(1000):
-    mat.append([random.randint(1, 101)])
-# f = open("plot_random_1000_{}_{}_{}_{}_{}.pickle", 'rb')
-# file = pickle.load(f)
-smp = np.array(mat)
-answers = func(smp).astype(int)
-# print(answers)
-dictionary = {}
-for answer in answers:
-    if answer[0] in dictionary.keys():
-        dictionary[answer[0]].append(answer[1])
-    else:
-        dictionary[answer[0]] = [answer[1]]
-print(dictionary)
-# f.close()
+def plot_heatmap(X: np.array, y: np.array, title: str, save_path: str = None):
+    mat_temp = np.concatenate((X, np.array(y).reshape(200, 1)), axis = 1)
+    k = np.array(sorted(mat_temp, key = lambda x: x[200]))
+    mat_temp = mat_temp[np.argsort(mat_temp[:, 200])]
+    mat_temp = k
+    mat_drop_column = np.delete(mat_temp, 200, 1)
+    plt.figure()
+    sbn.heatmap(mat_drop_column, cmap = "YlGnBu")
+    plt.title(title)
+    plt.savefig(save_path)
+    plt.show()
+
+
+def plot_heatmap_max(X: np.array, title: str, save_path: str = None):
+    plt.figure()
+    sbn.heatmap(X, cmap = "YlGnBu")
+    plt.title(title)
+    plt.savefig(save_path)
+    plt.show()
+
+
+# yitzhack's clusters
+files = [
+    "representatives_1000_MinibatchKmeans_200_Tsne_2_Standard.pickle",
+    "representatives_1000_MinibatchKmeans_200_Tsne_2_MinMax.pickle",
+    "representatives_1000_MinibatchKmeans_200_None_2_MinMax.pickle",
+    "representatives_1000_MinibatchKmeans_200_None_2_Standard.pickle"]
+for k, path in enumerate(files):
+    f = open(path, 'rb')
+    file = pickle.load(f)
+    smp = np.array(file)
+    answers = func(smp).astype(int)
+    yitz_labels = np.unique(answers[:, 0])
+    alon_labels = np.unique(answers[:, 1])
+
+    mat = np.zeros((len(yitz_labels) + 1, len(alon_labels) + 1))
+    mat[0] = np.array([0] + list(yitz_labels))
+    mat[:, 0] = np.array([0] + list(alon_labels))
+    for i, y in enumerate(yitz_labels):
+        for j, a in enumerate(alon_labels):
+            for ans in answers:
+                if ans[0] == y and ans[1] == a:
+                    mat[i + 1, j + 1] += 1
+    mat = mat.astype(int)
+    m = mat[1:, 1:]
+    arr = []
+    max_arr = []
+    for j, r in enumerate(m):
+        arr.append(r / sum(r))
+        max_arr.append(max(r / sum(r)))
+    plot_heatmap(arr, max_arr, 'Probabilites of cluster matching', "data_files\Figures\\figs" + str(k))
+    # plot_heatmap_max(max_arr, 'Maximum Probabilites of cluster matching', "data_files\Figures\\figsmax"+ str(i))
+    print(np.average(max_arr))
+
