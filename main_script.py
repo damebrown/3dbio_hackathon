@@ -11,7 +11,7 @@ import pickle
 
 # ------------ Constants --------
 # models_with_k_experiment:
-k_range = (3, 500)
+k_range = (3, 300)
 # k_range = (1, 3)
 k_step = 5
 # DBScan_experiment:
@@ -20,16 +20,16 @@ eps = [0.1, 0.25, 0.5, 0.75, 0.9]
 # Titles:
 K_TITLE = "Clustering by correspondence size with {}, k={}, {}-{}, {}"
 DBSCAN_TITLE = "Clustering by correspondence size with DBScan, \u03B5={}, {}-{},\n {}"
-DEFAULT_FIG_PATH = "/cs/usr/punims/Desktop/punims-dinaLab/Bio3D_Hackathon/3dbio_hackathon/data_files/Figures/representatives_1000_{}_{}_{}_{}_{}"
-GRAPH_FIG_PATH = "/cs/usr/punims/Desktop/punims-dinaLab/Bio3D_Hackathon/3dbio_hackathon/data_files/Figures/representatives_1000_{}_{}_{}_{}"
+DEFAULT_FIG_PATH = "/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/data_files/Figures/representatives_1000_{}_{}_{}_{}_{}"
+GRAPH_FIG_PATH = "/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/data_files/Figures/representatives_1000_{}_{}_{}_{}"
 GRAPH_TITLE = "Kmeans scores, {}-{}, {}"
-PKL_Path = "/cs/usr/punims/Desktop/punims-dinaLab/Bio3D_Hackathon/3dbio_hackathon/data_files/Figures/Pickle/representatives_1000_{}_{}_{}_{}_{}.pickle"
+PKL_Path = "/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/data_files/Figures/Pickle/representatives_1000_{}_{}_{}_{}_{}.pickle"
 # General constants:
 dim_reduction = ("Tsne", 2)
 # dim_reduction = (Tsne, 2)
 SAVE = True
 
-SCALER = "Standard"
+SCALER = "MinMax"
 
 
 # --------------------------------

@@ -4,12 +4,15 @@ import os
 ####################################################################################################
 # Code to replace the name of the structures in the cluster files with their corresponding number  #
 ####################################################################################################
-def create_num_to_name_dict(dict_path):
+def create_num_to_name_dict(dict_path, num_to_name=True):
     file_dict = open(dict_path, 'r')
     name_to_num = {}
     for line in file_dict.readlines():
         num, name = line.strip().split(",")
-        name_to_num[name] = num
+        if num_to_name:
+            name_to_num[name] = num
+        else:
+            name_to_num[num] = name
     file_dict.close()
     return name_to_num
 
