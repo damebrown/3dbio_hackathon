@@ -5,6 +5,12 @@ import os
 # Code to replace the name of the structures in the cluster files with their corresponding number  #
 ####################################################################################################
 def create_num_to_name_dict(dict_path, num_to_name=True):
+    """
+    creates a dictionary by loading a txt file that maps indexes to the actual number of a structure
+    (in some runs of the alignment code we had to renumber the structures to allow for an efficient
+    implementation of the algorithm
+
+    """
     file_dict = open(dict_path, 'r')
     name_to_num = {}
     for line in file_dict.readlines():
@@ -18,6 +24,10 @@ def create_num_to_name_dict(dict_path, num_to_name=True):
 
 
 def replace_names_cluster_files(clusters_path, dict_path):
+    """
+    replaces the names of the nanobodies in the cluster files to their number
+
+    """
     new_file = open(clusters_path + "output0.9_replaced.clstr", 'w')
     orig_file = open(clusters_path + "output0.9.clstr", 'r')
     name_to_num = create_num_to_name_dict(dict_path)
@@ -34,6 +44,11 @@ def replace_names_cluster_files(clusters_path, dict_path):
 
 
 def rename_structures(directory_path):
+    """
+    renames pdb files in the given directory
+    so that they are in chronological order. Creates a txt file with a mapping of
+    the original number of the structure and its new index
+    """
     print(os.listdir(directory_path))
     dict_file = open("struct_to_index_second_1000.txt", 'w')
     results = "/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/pdbs_5_from_200_renamed/"
@@ -44,5 +59,3 @@ def rename_structures(directory_path):
         os.rename(directory_path+file, results+str(i+1)+".pdb")
     dict_file.close()
 
-
-# rename_structures("/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/pdbs_5_from_200/")
