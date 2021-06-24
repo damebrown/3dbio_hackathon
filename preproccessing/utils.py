@@ -42,4 +42,4 @@ def rename_structures(directory_path):
     dict_file.close()
 
 
-rename_structures("/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/pdbs_5_from_200/")
+# rename_structures("/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/pdbs_5_from_200/")
