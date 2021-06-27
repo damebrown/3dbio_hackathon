@@ -94,7 +94,7 @@ def plot_heatmap(X: np.array, y: np.array, title: str, save_path: str = None):
 def plot_heatmap_max(X: np.array, title: str, save_path: str = None):
     df = pd.DataFrame({"Max": X},
                       index=list(range(1, 201)))
-    sbn.heatmap(df, fmt="g", cmap="YlGnBu")
+    sbn.heatmap(df, cmap="YlGnBu")
     plt.title(title)
     plt.savefig(save_path)
     plt.show()
@@ -137,13 +137,14 @@ def parse_pickle_files(files):
         for row in copy_dist_matrix:
             probabilites_arr.append(row / sum(row))
             max_arr.append(max(row / sum(row)))
-        plot_heatmap(probabilites_arr, max_arr, 'Probabilites of cluster matching, dim reduction: ' + titles[k], "data_files\\Figures\\figs" + str(k))
+        plot_heatmap(probabilites_arr, max_arr, 'Probabilities of cluster matching, dim reduction: ' + titles[k], "data_files\\Figures\\figs" + str(k))
         # plot_heatmap_max(max_arr, 'Maximum Probabilites of cluster matching', "data_files\Figures\\figsmax"+ str(i))
         probabilities_avg.append(np.average(max_arr))
     # return the average of all of the file's probabilites
-        plot_heatmap_max(np.array(max_arr), "max probability for same cluster heatmap, avg= " + str(np.average(max_arr)),"data_files\\Figures\\figs_max" + str(k))
+        plot_heatmap_max(np.array(max_arr), "max probability for same cluster heatmap, avg= " + "{:.2f}".format(np.average(max_arr)),"data_files\\Figures\\figs_max" + str(k))
+        break
     return probabilities_avg
 
 
-avg = parse_pickle_files(FILES)
-print(avg)
+# avg = parse_pickle_files(FILES)
+# print(avg)
