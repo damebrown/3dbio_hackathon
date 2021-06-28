@@ -132,7 +132,8 @@ def parse_pickle_files(files):
         correlation_matrix = correlation_matrix.astype(int)
         # making a copy to work on:
         copy_dist_matrix = correlation_matrix[1:, 1:]
-        probabilites_arr = []
+        probabilites_arr = list()
+        std_arr = list()
         max_arr = []
         for row in copy_dist_matrix:
             probabilites_arr.append(row / sum(row))
@@ -140,10 +141,12 @@ def parse_pickle_files(files):
         plot_heatmap(probabilites_arr, max_arr, 'Probabilities of cluster matching, dim reduction: ' + titles[k], "data_files\\Figures\\figs" + str(k))
         # plot_heatmap_max(max_arr, 'Maximum Probabilites of cluster matching', "data_files\Figures\\figsmax"+ str(i))
         probabilities_avg.append(np.average(max_arr))
+        std_arr.append(np.std(max_arr))
     # return the average of all of the file's probabilites
-        plot_heatmap_max(np.array(max_arr), "max probability for same cluster heatmap, avg= " + "{:.2f}".format(np.average(max_arr)),"data_files\\Figures\\figs_max" + str(k))
-        break
-    return probabilities_avg
+        plot_heatmap_max(np.array(max_arr), "max probability for same cluster heatmap, avg= " + "{:.2f}".format(
+            np.average(max_arr)) + ", std = " + "{:.2f}".format(np.std(max_arr)),"data_files\\Figures\\figs_max" +
+                         str(k))
+    return probabilities_avg, std_arr
 
 
 # avg = parse_pickle_files(FILES)
