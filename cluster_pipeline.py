@@ -96,7 +96,7 @@ class ClusterPipeline:
     def _create(self):
         """
         Creates the whole pipeline.
-        :return:
+        :return: None
         """
         pipes = [pipe for pipe in [("preprocessor", self.init_preprocess()), ("dim reduction", self.init_dim_reduction()), ("clusterer", self.init_cluster())] if pipe[1]]
         self.pipeline = Pipeline(pipes)
@@ -104,11 +104,10 @@ class ClusterPipeline:
     def fit_transform(self, data: np.array):
         """
         fit the data according to the pipeline parameters
-        :param data:
-        :return:
+        :param data: The given data.
+        :return: The transformed data.
         """
         return self.pipeline.fit_transform(data)
-
 
     def fit(self, data: np.array):
         """

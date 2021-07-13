@@ -26,15 +26,24 @@ GRAPH_FIG_PATH = "{}/data_files/Figures/representatives_1000_{}_{}_{}_{}"
 GRAPH_TITLE = "Kmeans scores, {}-{}, {}"
 PKL_Path = "{}/data_files/Figures/Pickle/representatives_1000_{}_{}_{}_{}_{}.pickle"
 # General constants:
-dim_reduction = ("Tsne", 2)
+dim_reduction = ("Tsne", 2) # Tuple of (String/None, int) describing the dimension reduction method and the number of
+# dimensions to project on to be used
 SAVE = True
-SCALER = "MinMax"
+SCALER = "MinMax" # standardization/normalization method
 
 
 # --------------------------------
 
 
 def plot_scatter_2d(X: np.array, y: np.array, title: str, save_path: str = None):
+    """
+    This function plot a 2d scatters.
+    :param X: X values.
+    :param y: y Values
+    :param title: Figure's title.
+    :param save_path: save path
+    :return: None
+    """
     fig, ax = plt.subplots()
     plt.title(title)
     for marker in np.unique(y):
@@ -46,6 +55,14 @@ def plot_scatter_2d(X: np.array, y: np.array, title: str, save_path: str = None)
 
 
 def plot_scatter_3d(X: np.array, y: np.array, title: str, save_path: str = None):
+    """
+    This function plot a 3d scatters.
+    :param X: X values.
+    :param y: y Values
+    :param title: Figure's title.
+    :param save_path: save path
+    :return: None
+    """
     fig = plt.figure()
     ax = fig.add_subplot(111, projection='3d')
     plt.title(title)
@@ -58,6 +75,15 @@ def plot_scatter_3d(X: np.array, y: np.array, title: str, save_path: str = None)
 
 
 def plot(X: np.array, y: np.array, title: str, save_path: str = None, heatmap: bool = False):
+    """
+    This function plot a 2d or 3d data.
+    :param X: X values.
+    :param y: y Values
+    :param title: Figure's title.
+    :param save_path: save path
+    :param heatmap: if plotting a heatmap is needed too.
+    :return: None
+    """
     plt.rcParams.update({'font.size': 8})
     if dim_reduction[1] == 3:
         plot_scatter_3d(X, y, title, save_path)
@@ -69,6 +95,14 @@ def plot(X: np.array, y: np.array, title: str, save_path: str = None, heatmap: b
 
 
 def plot_heatmap(X: np.array, y: np.array, title: str, save_path: str = None):
+    """
+    This function plot a heatmap.
+    :param X: X values.
+    :param y: y Values
+    :param title: Figure's title.
+    :param save_path: save path
+    :return: None
+    """
     indices = np.argsort(y, kind='mergesort')  # we need a stable sort
     plt.figure()
     ax = sbn.heatmap(X[indices], cmap="YlGnBu")
@@ -79,6 +113,14 @@ def plot_heatmap(X: np.array, y: np.array, title: str, save_path: str = None):
 
 
 def plot_score_graph(X: np.array, y: np.array, title: str, save_path: str = None):
+    """
+    This function plot a graph.
+    :param X: X values.
+    :param y: y Values
+    :param title: Figure's title.
+    :param save_path: save path
+    :return: None
+    """
     y = np.log1p(y)
     fig = plt.figure()
     ax = fig.add_subplot(111)
@@ -92,11 +134,23 @@ def plot_score_graph(X: np.array, y: np.array, title: str, save_path: str = None
 
 
 def save_labels(path, obj):
+    """
+    This function save a pickle object.
+    :param path: path to save.
+    :param obj: object to save.
+    :return: None
+    """
     with open(path, 'wb') as file:
         pickle.dump(obj, file)
 
 
 def models_with_k_experiment(data: np.array, model: str):
+    """
+    This experiment use the given clustering model (options: Kmeans, Spectral and Hierarchical) with
+    running k.
+    :param data: The given data.
+    :return: None
+    """
     for k in range(k_range[0], k_range[1], k_step):
         pipe = ClusterPipeline(model, dim_reduction, "Standard", n_clusters=k)
         pipe.fit_transform(data)
@@ -109,6 +163,11 @@ def models_with_k_experiment(data: np.array, model: str):
 
 
 def DBScan_experiment(data: np.array):
+    """
+    This experiment use DBScan clustering with running epsilon.
+    :param data: The given data.
+    :return: None
+    """
     for epsilon in eps:
         pipe = ClusterPipeline("DBScan", dim_reduction, "MinMax", eps=epsilon)
         pipe.fit(data)
@@ -123,6 +182,11 @@ def DBScan_experiment(data: np.array):
 
 
 def mini_batch_experiment(data: np.array):
+    """
+    This experiment use MiniBatchKmeans clustering with running k.
+    :param data: The given data.
+    :return: None
+    """
     scores = list()
     for k in range(k_range[0], k_range[1], k_step):
         pipe = ClusterPipeline("MiniBatchKmeans", dim_reduction, "Standard", n_clusters=k,
@@ -149,6 +213,10 @@ def mini_batch_experiment(data: np.array):
 
 
 def get_args():
+    """
+    This function parsing the given arguments.
+    :return: ArgumentParser object.
+    """
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('data', metavar='data', type=str,
                         help='path to dataframe')
