@@ -8,6 +8,7 @@ import sys
 from utils import *
 from mpl_toolkits.mplot3d import Axes3D
 import pickle
+import os
 
 # ------------ Constants --------
 # models_with_k_experiment:
@@ -20,15 +21,13 @@ eps = [0.1, 0.25, 0.5, 0.75, 0.9]
 # Titles:
 K_TITLE = "Clustering by correspondence size with {}, k={}, {}-{}, {}"
 DBSCAN_TITLE = "Clustering by correspondence size with DBScan, \u03B5={}, {}-{},\n {}"
-DEFAULT_FIG_PATH = "/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/data_files/Figures/representatives_1000_{}_{}_{}_{}_{}"
-GRAPH_FIG_PATH = "/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/data_files/Figures/representatives_1000_{}_{}_{}_{}"
+DEFAULT_FIG_PATH = "{}/data_files/Figures/representatives_1000_{}_{}_{}_{}_{}"
+GRAPH_FIG_PATH = "{}/data_files/Figures/representatives_1000_{}_{}_{}_{}"
 GRAPH_TITLE = "Kmeans scores, {}-{}, {}"
-PKL_Path = "/cs/usr/linoytsaban_14/PycharmProjects/3dbio_hackathon/data_files/Figures/Pickle/representatives_1000_{}_{}_{}_{}_{}.pickle"
+PKL_Path = "{}/data_files/Figures/Pickle/representatives_1000_{}_{}_{}_{}_{}.pickle"
 # General constants:
 dim_reduction = ("Tsne", 2)
-# dim_reduction = (Tsne, 2)
 SAVE = True
-
 SCALER = "MinMax"
 
 
@@ -101,36 +100,52 @@ def models_with_k_experiment(data: np.array, model: str):
     for k in range(k_range[0], k_range[1], k_step):
         pipe = ClusterPipeline(model, dim_reduction, "Standard", n_clusters=k)
         pipe.fit_transform(data)
-        X = (pipe.pipeline.named_steps)['dim reduction'].named_steps[dim_reduction[0]].transform(data)
+        X = (pipe.pipeline.named_steps)['dim reduction'].named_steps[dim_reduction[0]].transform(
+            data)
         y = pipe.pipeline.named_steps["clusterer"].named_steps[model].labels_
-        plot(X, y, K_TITLE.format(model, k, dim_reduction[0], dim_reduction[1], SCALER), DEFAULT_FIG_PATH.format("Kmeans", k, dim_reduction[0], dim_reduction[1], SCALER))
+        plot(X, y, K_TITLE.format(model, k, dim_reduction[0], dim_reduction[1], SCALER),
+             DEFAULT_FIG_PATH.format(os.getcwd(), "Kmeans", k, dim_reduction[0], dim_reduction[1],
+                                     SCALER))
 
 
 def DBScan_experiment(data: np.array):
     for epsilon in eps:
         pipe = ClusterPipeline("DBScan", dim_reduction, "MinMax", eps=epsilon)
         pipe.fit(data)
-        X = (pipe.pipeline.named_steps)['dim reduction'].named_steps[dim_reduction[0]].transform(data)
+        X = (pipe.pipeline.named_steps)['dim reduction'].named_steps[dim_reduction[0]].transform(
+            data)
         y = pipe.pipeline.named_steps["clusterer"].named_steps["DBScan"].labels_
         num_of_clusters = y.max()
         print(num_of_clusters)
-        plot(X, y, DBSCAN_TITLE.format(epsilon, dim_reduction[0], dim_reduction[1], SCALER), DEFAULT_FIG_PATH.format("DBscan", str(epsilon).replace('.', " "), dim_reduction[0], dim_reduction[1], SCALER))
+        plot(X, y, DBSCAN_TITLE.format(epsilon, dim_reduction[0], dim_reduction[1], SCALER),
+             DEFAULT_FIG_PATH.format(os.getcwd(), "DBscan", str(epsilon).replace('.', " "),
+                                     dim_reduction[0], dim_reduction[1], SCALER))
 
 
 def mini_batch_experiment(data: np.array):
     scores = list()
     for k in range(k_range[0], k_range[1], k_step):
-        pipe = ClusterPipeline("MiniBatchKmeans", dim_reduction, "Standard", n_clusters=k, batch_size=10)
+        pipe = ClusterPipeline("MiniBatchKmeans", dim_reduction, "Standard", n_clusters=k,
+                               batch_size=10)
         pipe.fit_transform(data)
         if dim_reduction[0]:
-            X = (pipe.pipeline.named_steps)['dim reduction'].named_steps[dim_reduction[0]].transform(data)
+            X = (pipe.pipeline.named_steps)['dim reduction'].named_steps[
+                dim_reduction[0]].transform(data)
         else:
             X = data
         y = pipe.pipeline.named_steps["clusterer"].named_steps["MiniBatchKmeans"].labels_
-        plot(X, y, K_TITLE.format("MiniBatchKmeans", k, dim_reduction[0], dim_reduction[1], SCALER), DEFAULT_FIG_PATH.format("MinibatchKmeans", k, dim_reduction[0], dim_reduction[1], SCALER), heatmap=False)
-        scores.append(pipe.pipeline.named_steps["clusterer"].named_steps["MiniBatchKmeans"].inertia_)
-        save_labels(PKL_Path.format("MinibatchKmeans", k, dim_reduction[0], dim_reduction[1], SCALER), y)
-    plot_score_graph(list(range(k_range[0], k_range[1], k_step)), scores, GRAPH_TITLE.format(dim_reduction[0], dim_reduction[1], SCALER), GRAPH_FIG_PATH.format("Kmeans", dim_reduction[0], dim_reduction[1], SCALER))
+        plot(X, y, K_TITLE.format("MiniBatchKmeans", k, dim_reduction[0], dim_reduction[1], SCALER),
+             DEFAULT_FIG_PATH.format(os.getcwd(), "MinibatchKmeans", k, dim_reduction[0],
+                                     dim_reduction[1], SCALER), heatmap=False)
+        scores.append(
+            pipe.pipeline.named_steps["clusterer"].named_steps["MiniBatchKmeans"].inertia_)
+        save_labels(
+            PKL_Path.format(os.getcwd(), "MinibatchKmeans", k, dim_reduction[0], dim_reduction[1],
+                            SCALER), y)
+    plot_score_graph(list(range(k_range[0], k_range[1], k_step)), scores,
+                     GRAPH_TITLE.format(dim_reduction[0], dim_reduction[1], SCALER),
+                     GRAPH_FIG_PATH.format(os.getcwd(), "Kmeans", dim_reduction[0],
+                                           dim_reduction[1], SCALER))
 
 
 def get_args():
@@ -141,34 +156,29 @@ def get_args():
 
 
 def load_data(data_path):
+    """
+    loads the csv file containing the correspondence matrix into a symmetrical matrix in
+    the form of an np.array
+    :param data_path: path to csv file
+    :return: the matrix as np array
+    """
     data = triangle_to_symmetric_matrix(data_path)
     return data
 
 
 def main():
-    # load data into matrix
-    # How much data can we load, if not everything how do we split it up in an intelligent way
-
-    # cluster
-    # What type of clustering algorithm works best
-    # if there's a lot of data can Kmeans / Spectral work? if we reduce the amount of data would they work?
-    # PCA or Tsne for dimensional reduction?
-
-    # plot
-    # heatmaps vs scatter plots
-
     args = get_args()
     params = args.parse_args(sys.argv[1:])
     data_path = params.data
     data = load_data(data_path)
+    # IMPORTANT: as seen above, there different experiment functions you can call that run different
+    # clustering methods, 'mini_batch_experiment' is just one example. Please note that different
+    # experiments receive different parameters
     mini_batch_experiment(data)
-    # DBScan_experiment(data)
 
 
 if __name__ == '__main__':
-    # path = "/cs/usr/punims/punims/Bio3D_Hackathon/3dbio_hackathon/data_files/Figures/Pickle/plot_random_1000_{}_{}_{}_{}_{}.pickle"
-    # file = open(path,'rb')
-    # object_file = pickle.load(file)
-    # print(object_file)
+    # to run the following code, you need to fill the path to the csv file containing the
+    # correspondence matrix as an argument
+    # for example: "...3dbio_hackathon/data_files/databases/correspond_1000_biggest_cluster_1.csv"
     main()
-    # # save_labels(["T", "t"])

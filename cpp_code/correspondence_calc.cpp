@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 
     // read the two files into Molecule
     Molecule<Atom> mol1, mol2;
-
+    // file to write the size of the correspondence between each two nanobodies.
     std::ofstream f("/cs/labs/dina/linoytsaban_14/correspond.csv");
     for (int i = 100; i < 200; i++) {
         std::string file1 = "/cs/labs/dina/linoytsaban_14/pdbs1/pdbs1/" + std::to_string(i) + ".pdb";
@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
             // atom index
         }
         for (int j = 100; j < 200; j++) {
+        // this loop intentionaly starts from 100 and not 0 so we don't make the same calculation twice
             std::string file2 = "/cs/labs/dina/linoytsaban_14/pdbs1/pdbs1/" + std::to_string(j)
                     +".pdb";
             std::cout << file2 << std::endl;
@@ -46,7 +47,7 @@ int main(int argc, char *argv[]) {
             std::ifstream fileModel1(file2);
             Match match;
             if(!fileModel1) {
-//                std::cout << "File " << file2 << "does not exist." << std::endl;
+                std::cout << "File " << file2 << "does not exist." << std::endl;
                 break;
             }
             // match is a class that stores the correspondence list, eg.
@@ -81,6 +82,9 @@ int main(int argc, char *argv[]) {
         f << std::endl;
         mol1.clear();
     }
+    // by this point we have a triangular matrix that contains the size of match between
+    // each two nanobodies in the given directory.
+    //(triangular since we calculated the match for each pair once)
     f.close();
     return 0;
 

@@ -22,10 +22,18 @@ titles = ['None', 'Tsne']
 # Code to replace the name of the structures in the cluster files with their corresponding number  #
 ####################################################################################################
 
-def triangle_to_symmetric_matrix(matrix_path, dict_path = False):
-    df = pd.read_csv(matrix_path, sep = ',', header = None)
+def triangle_to_symmetric_matrix(matrix_path, dict_path=False):
+    """
+    Converts the triangular correspondence matrix that we get as output from "calc_correspondence.cpp"
+    into a symmetrical one where the ij'th entry is the size of the correspondence between
+    the i'th nanobody and the j'th nanobody.
+    :param matrix_path: path the csv file with the triangular correspondence matrix
+    :param dict_path: path to a dictionary converting the index of a pdb file to the original one
+    ** only relevant in cases where we changed the nanobody indexes for convenience.**
+    :return: returns an np array with the symmetrical matrix
+    """
+    df = pd.read_csv(matrix_path, sep=',', header=None)
     orig_matrix = df.values[:, :df.values.shape[0]]
-    # orig_matrix = np.array([[123,107,113,103],[140,110,108, np.nan],[136,106, np.nan, np.nan],[115, np.nan, np.nan, np.nan]])
     new_matrix = np.zeros((orig_matrix.shape[0], orig_matrix.shape[0]))
     for i in range(orig_matrix.shape[0]):
         left_side = [orig_matrix[k][j] for k, j in zip(range(0, i, 1), range(i, 0, -1))]
@@ -39,12 +47,6 @@ def triangle_to_symmetric_matrix(matrix_path, dict_path = False):
             [num_to_name_dict[str(num)] for num in range(1, new_matrix.shape[0] + 1)])
         return matches_df, new_matrix.astype(int)
     return new_matrix.astype(int)
-    # create_num_to_name_dict("name_num_dict")
-
-
-# replace_names_cluster_files("output_0.8.clstr", "name_num_dict")
-# triangle_to_symmetric_matrix("correspond_1000_first_batch_08.csv",
-#                              "preproccessing/struct_to_index_first_1000.txt")
 
 
 def get_key(val, dict):
@@ -79,13 +81,13 @@ def find_clusters(samples):
 
 
 def plot_heatmap(X: np.array, y: np.array, title: str, save_path: str = None):
-    mat_temp = np.concatenate((X, np.array(y).reshape(200, 1)), axis = 1)
-    k = np.array(sorted(mat_temp, key = lambda x: x[200]))
+    mat_temp = np.concatenate((X, np.array(y).reshape(200, 1)), axis=1)
+    k = np.array(sorted(mat_temp, key=lambda x: x[200]))
     mat_temp = mat_temp[np.argsort(mat_temp[:, 200])]
     mat_temp = k
     mat_drop_column = np.delete(mat_temp, 200, 1)
     plt.figure()
-    sbn.heatmap(mat_drop_column, cmap = "YlGnBu")
+    sbn.heatmap(mat_drop_column, cmap="YlGnBu")
     plt.title(title)
     plt.savefig(save_path)
     plt.show()
@@ -138,16 +140,19 @@ def parse_pickle_files(files):
         for row in copy_dist_matrix:
             probabilites_arr.append(row / sum(row))
             max_arr.append(max(row / sum(row)))
-        plot_heatmap(probabilites_arr, max_arr, 'Probabilities of cluster matching, dim reduction: ' + titles[k], "data_files\\Figures\\figs" + str(k))
+        plot_heatmap(probabilites_arr, max_arr,
+                     'Probabilities of cluster matching, dim reduction: ' + titles[k],
+                     "data_files\\Figures\\figs" + str(k))
         # plot_heatmap_max(max_arr, 'Maximum Probabilites of cluster matching', "data_files\Figures\\figsmax"+ str(i))
         probabilities_avg.append(np.average(max_arr))
         std_arr.append(np.std(max_arr))
-    # return the average of all of the file's probabilites
-        plot_heatmap_max(np.array(max_arr), "max probability for same cluster heatmap, avg= " + "{:.2f}".format(
-            np.average(max_arr)) + ", std = " + "{:.2f}".format(np.std(max_arr)),"data_files\\Figures\\figs_max" +
+        # return the average of all of the file's probabilites
+        plot_heatmap_max(np.array(max_arr),
+                         "max probability for same cluster heatmap, avg= " + "{:.2f}".format(
+                             np.average(max_arr)) + ", std = " + "{:.2f}".format(np.std(max_arr)),
+                         "data_files\\Figures\\figs_max" +
                          str(k))
     return probabilities_avg, std_arr
-
 
 # avg = parse_pickle_files(FILES)
 # print(avg)
