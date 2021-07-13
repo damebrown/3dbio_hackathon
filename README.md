@@ -13,8 +13,9 @@ Authors:
 	- Yitzchak Vaknin
 	
 Description:
-This program includes a pipeline for structural clustering of proteins. 
-It contains scripts for preprocessing the output of TrainedNanoNet as well as the output from CD-Hit.
+
+    This program includes a pipeline for structural clustering of proteins. 
+    It contains scripts for preprocessing the output of TrainedNanoNet as well as the output from CD-Hit.
 
 Files:
 
